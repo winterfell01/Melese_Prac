@@ -20,62 +20,62 @@ public class HomeCtrl {
 
 
     @RequestMapping("/home")
-    public String homepage(Model model) {
-        model.addAttribute("accountBalance", accountRepository.findAll());
-        model.addAttribute("login", userRepository.findAll());
-        return "index";
-        @RequestMapping("/")
-        public String index(Model model) {
+    public String home() {
+        return "home";
+    }
+
+    @RequestMapping("/")
+    public String index(Model model) {
+        return "loginform";
+    }
+
+    @RequestMapping(value = "/login",method = RequestMethod.GET)
+    public String getLoginForm(){
+        return "loginform";
+    }
+
+    @RequestMapping(value = "/login",method = RequestMethod.POST)
+    public String doLogin(@ModelAttribute(name = "loginForm") User user, Model model)
+    {
+
+        if(service.findUser(user.getUsername(),user.getPassword())!= null)
+        {
+            return "home";
+        }
+        else
+        {
+            model.addAttribute("invalidCredentials",true);
             return "loginform";
         }
+    }
 
-        @RequestMapping(value = "/user",method = RequestMethod.GET)
-        public String getLoginForm(){
-            return "loginform";
-        }
+    @RequestMapping(value = "/register",method = RequestMethod.GET)
+    public String getRegisterForm(Model model)
+    {
+        model.addAttribute("user",new User());
 
-        @RequestMapping(value = "/login",method = RequestMethod.POST)
-        public String doLogin(@ModelAttribute(name = "loginForm") User user, Model model)
-        {
+        return "registerform";
+    }
 
-            if(service.findUser(user.getUsername(),user.getPassword())!= null)
-            {
-                return "home";
-            }
-            else
-            {
-                model.addAttribute("invalidCredentials",true);
-                return "loginform";
-            }
-        }
+    @RequestMapping(value = "/register",method = RequestMethod.POST)
+    public String register(@Valid User userForm, BindingResult result){
 
-        @RequestMapping(value = "/register",method = RequestMethod.GET)
-        public String getRegisterForm(Model model)
-        {
-            model.addAttribute("login",new Login());
-
+        if(result.hasErrors()){
             return "registerform";
         }
 
-        @RequestMapping(value = "/register",method = RequestMethod.POST)
-        public String register(@Valid User userForm, BindingResult result){
+        String firstname = userForm.getFirstname();
+        String lastname = userForm.getLastname();
+        String username = userForm.getUsername();
+        String password = userForm.getPassword();
 
-            if(result.hasErrors()){
-                return "registerform";
-            }
+        User user = new User(firstname,lastname,username,password);
 
-            String firstname = userForm.getFirstname();
-            String lastname = userForm.getLastname();
-            String username = userForm.getUsername();
-            String password = userForm.getPassword();
-
-            User = new User(firstname,lastname,username,password);
-
-            service.registerUser(login);
-            return "loginform";
-        }
-
+        service.registerUser(user);
+        return "loginform";
     }
+
+}
     @RequestMapping("/accountlist")
     public String departmentList(Model model) {
         model.addAttribute("accountBalances", accountRepository.findAll());
